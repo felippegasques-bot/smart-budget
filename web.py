@@ -1,30 +1,20 @@
 from flask import Flask, render_template, request, redirect
+from main import criar_tabela, adicionar_gasto, listar_gastos, gasto_por_categoria
+
 import matplotlib
-matplotlib.use("Agg")  # necessário para servidor (Render)
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 
-# IMPORTS DO SEU PROJETO
-from main import criar_tabela, adicionar_gasto, listar_gastos, gasto_por_categoria
-
 app = Flask(__name__)
 
-# cria tabela ao iniciar
 criar_tabela()
 
-
-# =========================
-# ROTA PRINCIPAL
-# =========================
 @app.route("/")
 def index():
     gastos = listar_gastos()
     return render_template("index.html", gastos=gastos)
 
-
-# =========================
-# ADICIONAR GASTO
-# =========================
 @app.route("/add", methods=["POST"])
 def add():
     desc = request.form["descricao"]
@@ -32,13 +22,8 @@ def add():
     cat = request.form["categoria"]
 
     adicionar_gasto(desc, valor, cat)
-
     return redirect("/")
 
-
-# =========================
-# GERAR GRÁFICO
-# =========================
 @app.route("/grafico")
 def grafico():
     dados = gasto_por_categoria()
@@ -46,7 +31,6 @@ def grafico():
     categorias = list(dados.keys())
     valores = list(dados.values())
 
-    # garante pasta static
     if not os.path.exists("static"):
         os.makedirs("static")
 
@@ -60,10 +44,6 @@ def grafico():
 
     return render_template("grafico.html", imagem=caminho)
 
-
-# =========================
-# EXECUÇÃO (IMPORTANTE PRO RENDER)
-# =========================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
